@@ -109,7 +109,7 @@ df_c_media_anual = df_c_media_anual %>% mutate(comp_media_anual = round(liquido 
 ggplot(data = df_c_media_anual)+
   geom_col(aes(x = ano, y = comp_media_anual, fill = sexo_raca), position = 'dodge')+
   theme_light()+
-  labs(title = 'Diferença de Remuneração Liquida em (%) de Remuneração do Poder Executivo Federal entre os anos de 1999 e 2020 por Sexo e Raça',
+  labs(title = 'Diferença de Remuneração Liquida em (%) em comparativo com Remumeração Média do Poder Executivo Federal\nentre os anos de 1999 e 2020 por Sexo e Raça',
        subtitle = 'Fonte - Atlas do Estado Brasileiro',
        caption = "Produzido por Christian Basilio",
        x = 'Ano',
