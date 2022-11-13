@@ -143,12 +143,73 @@ print(paste('No período entre 1999 e 2020 homens receberam', dif_salarial_homem
 
 ### _________________________________________________________________________________#
 
+# Criando base com as médias anuais
+
+df_agrupado_ano = df %>% group_by(ano) %>% summarise(media_liquida_ano = mean(liquido))
+
+# Agrupando os conjuntos de dados
+df_agrupado = left_join(df, df_agrupado_ano)
+
+df_agrupado_final = df_agrupado %>% mutate(comparativo_com_a_media = round(liquido / media_liquida_ano-1,2)*100)
+
+
+
+# Analise do quantitivos de vinculos no Poder Executivo Federal Civil ------
+vinculos = read.csv('base_2.csv', sep = ';')
+
+# agrupando os vinculos por sexto
+
+vinculos_sexo = vinculos %>% select(ano ,fem_ano, mas_ano) %>% group_by(ano) %>% summarise(feminino = mean(fem_ano), masculino =  mean(mas_ano)) %>% 
+  mutate(comparativo = round(masculino / feminino - 1,2)*100)
+
+
+# Plotando grafico de linha que mostra o comparativo % de salarios de homens para com mulheres, mostrando no caso o quao mais eles ganham
+
+ggplot(data= vinculos_sexo)+
+  geom_line(aes(x= ano, y = comparativo), col = 'red')+
+  labs(title = 'Comparativo de Vinculos Ativos entre Homens e Mulheres no Poder Executivo Civil Federal entre 1999 e 2020',
+       subtitle = 'Calculo: Cargos de Vinculos de Homens / Vinculos de Mulheres * 100',
+       caption = 'Fonte - Atlas do Estado Brasileiro',
+       y = 'Comparativo em (%)',
+       x = 'Ano')
+
+# É possivel na Analise de que homens sempre tiveram mais postos no Poder Executivo Federal, chegando a 30% entre os anos de 2006 a 2009
+
+base_geral_vinculos = vinculos %>% mutate(porcentagem_mulheres_cor_anual = round(Fem / total_ano,2)*100,
+                                          porcentagem_homens_cor_anual = round(Mas / total_ano,2)*100,
+                                          total_porcentual_anual = porcentagem_homens_cor_anual + porcentagem_mulheres_cor_anual)
+
+vinculos_mulheres = vinculos %>% select(ano, fem_ano, total_ano) %>% mutate(porcentagem = fem_ano / total_ano * 100)
+
+# Média de Vinculos de Mulheres no poder Executivo federal ativo
+
+media_vinculos_mulheres = vinculos_mulheres$porcentagem %>% mean()
+
+# Porcentagem de Cargos de Mulheres
+print(paste('Porcentagem de Cargos de Mulheres', round(media_vinculos_mulheres,2)))
+
+
+  
+# Plotagem de Grafico
+
+ggplot(data = base_geral_vinculos)+
+  geom_col(aes(x = ano, y = total_porcentual_anual, fill = raça), position = 'dodge')+
+  labs(title = 'Gráfico de Porcentagem de Cargos ativos no Poder Executivo por Cor entre nos anos de 1999 e 2020',
+       fill = 'Cor / Raça',
+       x = 'Ano', y = '(%)')+
+  theme_classic()
+
+#Pessoas brancas em todos os anos da pesquisa mantem uma grande maioria em todos os anos, tendo aumento, chegando a mais de 50% pós os anos 2000 e atingindo picos entre os anos de 2011 e 2020
+#Pardos não tem muita alteração de participação nos cargos
+#Pretos tiveram um pequeno aumento em % entre os anos de 2017 e 2020
+#É importante ressaltar a diminuição da expressividade de falta de dados sobre a cor dos ocupantes dos cargos, acompanhando dessa diminuição de informações de Não informados veio o aumento da % de brancos
+#Indigenas sempre mantiveram inexpressiva presença no Porder Executivo
 
 # Grafico de Tendência salarial------------------------------------------------
 
-ggplot(df)+
-  geom_smooth(aes(x = ano, y = liquido, col = sexo_raca), size = .8, stat = 'smooth', method = lm)+
-  labs(title = 'Remuneração Líquida Mensal em R$ no Executivo Federal Ativo, por Sexo e Raça nos entre os anos 1999 e 2020 em Série Temporal',
+ggplot(df_agrupado_final)+
+  geom_smooth(aes(x = ano, y = comparativo_com_a_media, col = sexo_raca), size = .8, stat = 'smooth', method = lm)+
+  labs(title = 'Comparativo de TendiRemuneração Líquida Mensal em R$ no Executivo Federal Ativo, por Sexo e Raça nos entre os anos 1999 e 2020 em Série Temporal',
        subtitle = 'Fonte - Atlas do Estado Brasileiro',
        caption = 'Produzido por Christian Basilio Oliveira',
        x = 'Anos',
@@ -157,3 +218,22 @@ ggplot(df)+
        col = 'Sexo e Raça')+
   theme(legend.position = 'top', legend.direction = 'horizontal', legend.title = element_text(size = 8),
         title = element_text(size = 12))
+
+
+# Analise Final ------
+#Há uma tendência de nos proximos anos de:
+#1. Aumento na Representatividade de Pretos e pardos
+#2 . Diminuição de Vinculos que não tenham o fator cor declarado
+#3 . Aumento de Vinculos de Brancos
+#4 . Diminuição de Vinculos de amarelos
+#5 . Uma Continuidade de inexpressiva representação de Indigenas
+
+#É colocado como fator os anos anteriores então pode ser que com a adoção de novas políticas como políticas de cotas para cargos públicos as tendências mudem.
+
+
+# * Dentro das 2 analises das diferentes bases é possível ver uma conexão entre as médias saláriais dentro do quesito Cor/Raça, tendo uma conexão tambem com a o fato da maioria dos cargos serem ocupados por Brancos, sendo que é algo que é conhecido que brancos ocupam mais cargos de liderança.
+# * Na relação de Genero há uma diferença salárial, que se coloca como diferença a questão de raça, mulheres negras recebem em média 19% abaixo das médias salariais entre os anos de 1999 e 2020 enquanto mulheres brancas recebem 7,3 % acima da mesma média salarial
+# * A diferença salarial entre homens negros e homens brancos fica em mais de 36%, o homem branco Recebendo 24 % acima da média e o homem negro recebendo 12 % abaixo das médias saláriais entre os anos de 1999 e 2020
+# * É notavel a diferença na quantidade de cargos dentro da questão racial, sendo que ouve um aumento declarado de Brancos no Cargos ativos do Executivo Federal, principalmente nos anos de 2010 até 2020
+# * Há um pequeno aumento na representatividade de pretos e pardos entre os anos e 2016 e 2020, sendo que os pardos tem um fator de oscilação entre toda a série historica
+# * Mulheres ocupam 44,3% dos cargos no executivo federal ativo porem em média 5,9 % a menos que a média salárial
