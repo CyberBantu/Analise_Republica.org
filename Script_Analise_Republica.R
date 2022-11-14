@@ -209,7 +209,7 @@ ggplot(data = base_geral_vinculos)+
 
 ggplot(df_agrupado_final)+
   geom_smooth(aes(x = ano, y = comparativo_com_a_media, col = sexo_raca), size = .8, stat = 'smooth', method = lm)+
-  labs(title = 'Comparativo de TendiRemuneração Líquida Mensal em R$ no Executivo Federal Ativo, por Sexo e Raça nos entre os anos 1999 e 2020 em Série Temporal',
+  labs(title = 'Comparativo de Tendencia de Remuneração Líquida Mensal em R$ no Executivo Federal Ativo, por Sexo e Raça nos entre os anos 1999 e 2020 em Série Temporal',
        subtitle = 'Fonte - Atlas do Estado Brasileiro',
        caption = 'Produzido por Christian Basilio Oliveira',
        x = 'Anos',
